@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Management</title>
+</head>
+<body>
+  <h1>Employee Management System</h1>
+
+  <!-- Form to add employee -->
+  <h2>Add Employee</h2>
+  <form id="addEmployeeForm">
+    <label for="employeeId">Employee ID:</label>
+    <input type="text" id="employeeId" name="employeeId"><br><br>
+    <label for="employeeName">Employee Name:</label>
+    <input type="text" id="employeeName" name="employeeName"><br><br>
+    <button type="button" onclick="addEmployee()">Add Employee</button>
+  </form>
+
+  <!-- List of employees -->
+  <h2>Employees</h2>
+  <ul id="employeeList"></ul>
+
+  <script>
+    function addEmployee() {
+      var id = document.getElementById("employeeId").value;
+      var name = document.getElementById("employeeName").value;
+
+      fetch('http://localhost:3000/employee/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: id, name: name }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Employee added:', data);
+        // Clear input fields after successful addition
+        document.getElementById("employeeId").value = "";
+        document.getElementById("employeeName").value = "";
+        // Refresh employee list
+        fetchEmployeeList();
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    }
+
+    function fetchEmployeeList() {
+      fetch('http://localhost:3000/employee/all')
+      .then(response => response.json())
+      .then(data => {
+        console.log('Employee list:', data);
+        displayEmployeeList(data);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    }
+
+    function displayEmployeeList(employees) {
+      var employeeList = document.getElementById("employeeList");
+      employeeList.innerHTML = ""; // Clear previous list
+      employees.forEach(employee => {
+        var listItem = document.createElement("li");
+        listItem.textContent = `ID: ${employee.id}, Name: ${employee.name}`;
+        employeeList.appendChild(listItem);
+      });
+    }
+
+    // Initial fetch to load employee list
+    fetchEmployeeList();
+  </script>
+</body>
+</html>
